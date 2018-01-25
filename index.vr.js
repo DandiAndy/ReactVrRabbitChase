@@ -44,7 +44,7 @@ class InfoBox extends React.Component{
     render(){
         let creatures = this.props.creatures;
         let InfoDOM = [];
-        Object.keys(creatures).forEach((c) => {InfoDOM.push(this.renderCreatureInfo(c))});
+        Object.keys(creatures).forEach((c, index) => {InfoDOM.push(this.renderCreatureInfo(c, index))});
         return (
             <View className="infoBox" style={{
                 transform: [{translate: [0, 0, -3]}],
@@ -62,7 +62,7 @@ class RabbitChase extends React.Component {
 
     /*CONSTRUCTOR FOR ENTIRE SCENE*/
 
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             creatures: {
@@ -76,6 +76,12 @@ class RabbitChase extends React.Component {
                     posY: new Animated.Value(-0.7),
                     posZ: new Animated.Value(0),
                     jumpUp: false,
+                    poem: [
+                        "Fox says bork.\n Rabbit says REEEE.",
+                        "Little Rabbit.\n Just wants to be free.",
+                        "Run and run.\n Leave him be.",
+                        "He wants to live.\n Can't you see?"
+                    ]
                 },
                 fox: {
                     sound: "bork",
@@ -87,60 +93,53 @@ class RabbitChase extends React.Component {
                     posY: new Animated.Value(-1.0),
                     posZ: new Animated.Value(0),
                     jumpUp: true,
+                    poem: [
+                        "Fox says bork.\n Rabbit says REEEE.",
+                        "Little Rabbit.\n Just wants to be free.",
+                        "Run and run.\n Leave him be.",
+                        "He wants to live.\n Can't you see?"
+                    ]
                 }
             }
-        }
+        };
     }
 
     /*START ANIMATIONS*/
 
-    componentDidMount(){
-        this.foxRun();
-        this.foxBounce();
-        this.rabbitRun();
-        this.rabbitBounce();
+    componentDidMount (){
+        let fox = this.state.creatures.fox;
+        let rabbit = this.state.creatures.rabbit;
+        this.run(fox, 4000);
+        this.run(rabbit, 4000);
+        this.bounce(rabbit, 0.7);
+        this.bounce(fox, 0.9);
     }
 
     /*ANIMATIONS*/
-
-    foxRun = () => {
-        let fox = this.state.creatures.fox;
-        fox.rotY.setValue(0);
+    run = (creature, timing) => {
+        creature.rotY.setValue(0);
         Animated.timing(
-            fox.rotY,
+            creature.rotY,
             {
                 toValue: -360,
-                duration: 4000, //in millis
+                duration: timing, //in millis
             }
-        ).start(this.foxRun);
+        ).start(() => this.run(creature, timing));
     };
 
-    rabbitRun = () => {
-        let rabbit = this.state.creatures.rabbit;
-        rabbit.rotY.setValue(0);
-        Animated.timing(
-            rabbit.rotY,
-            {
-                toValue: -360,
-                duration: 4000, //in millis
-            }
-        ).start(this.rabbitRun);
-    };
-
-    foxBounce = () => {
-        let fox = this.state.creatures.fox;
+    bounce = (creature, bounciness) => { 
         Animated.sequence([
             //UP
             Animated.parallel([
                 Animated.timing(
-                    fox.posY,
+                    creature.posY,
                     {
-                        toValue: -0.9,
+                        toValue: -1*bounciness, //bounces higher with lower bounce number (range of 0-1).
                         duration: 500,
                     }
                 ),
                 Animated.timing(
-                    fox.rotX,
+                    creature.rotX,
                     {
                         toValue: -15,
                         duration: 500,
@@ -150,65 +149,24 @@ class RabbitChase extends React.Component {
             //DOWN
             Animated.parallel([
                 Animated.timing(
-                    fox.posY,
+                    creature.posY,
                     {
                         toValue: -1,
                         duration: 500,
                     }
                 ),
                 Animated.timing(
-                    fox.rotX,
+                    creature.rotX,
                     {
                         toValue: 0,
                         duration: 500,
                     }
                 )
             ])
-        ]).start(this.foxBounce);
-    };
-
-    rabbitBounce = () => {
-        let rabbit = this.state.creatures.rabbit;
-        Animated.sequence([
-            //UP
-            Animated.parallel([
-                Animated.timing(
-                    rabbit.posY,
-                    {
-                        toValue: -0.8,
-                        duration: 500,
-                    }
-                ),
-                Animated.timing(
-                    rabbit.rotX,
-                    {
-                        toValue: 20,
-                        duration: 500,
-                    }
-                )
-            ]),
-            //DOWN
-            Animated.parallel([
-                Animated.timing(
-                    rabbit.posY,
-                    {
-                        toValue: -1,
-                        duration: 500,
-                    }
-                ),
-                Animated.timing(
-                    rabbit.rotX,
-                    {
-                        toValue: 0,
-                        duration: 500,
-                    }
-                )
-            ])
-        ]).start(this.rabbitBounce);
+        ]).start(() => this.bounce(creature, bounciness));
     };
 
     /*RENDER SCENE*/
-
     render() {
         let creatures = this.state.creatures;
         return (
