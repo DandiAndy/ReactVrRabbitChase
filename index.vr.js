@@ -7,6 +7,7 @@ import {
     View,
     Model,
     Animated,
+    AmbientLight,
 } from 'react-vr';
 
 
@@ -22,7 +23,7 @@ class CreatureInfo extends React.Component{
         return(
 
             <Text className="creatureInfo">
-                {this.props.name} says {this.props.sound}.
+                {this.props.sound} says {this.props.name}.
             </Text>
 
         );
@@ -66,40 +67,90 @@ class RabbitChase extends React.Component {
         super(props);
         this.state = {
             creatures: {
-                rabbit: {
-                    sound: "REEEEEEEEEEEEEEEEEE",
-                    name: "Rabbit",
-                    rotX: new Animated.Value(0),
-                    rotY: new Animated.Value(0),
-                    rotZ: new Animated.Value(0),
-                    posX: new Animated.Value(-1.0),
-                    posY: new Animated.Value(-0.7),
-                    posZ: new Animated.Value(0),
-                    jumpUp: false,
-                    poem: [
-                        "Fox says bork.\n Rabbit says REEEE.",
-                        "Little Rabbit.\n Just wants to be free.",
-                        "Run and run.\n Leave him be.",
-                        "He wants to live.\n Can't you see?"
-                    ]
-                },
                 fox: {
-                    sound: "bork",
-                    name: "Fox",
+                    sound: "Bork",
+                    name: "fox",
                     rotX: new Animated.Value(0),
                     rotY: new Animated.Value(0),
                     rotZ: new Animated.Value(0),
-                    posX: new Animated.Value(1.0),
+                    posX: new Animated.Value(2.0),
                     posY: new Animated.Value(-1.0),
                     posZ: new Animated.Value(0),
+                    scale: 0.03,
                     jumpUp: true,
-                    poem: [
-                        "Fox says bork.\n Rabbit says REEEE.",
-                        "Little Rabbit.\n Just wants to be free.",
-                        "Run and run.\n Leave him be.",
-                        "He wants to live.\n Can't you see?"
-                    ]
-                }
+                    mtl: './beasts/fox.mtl',
+                    obj: './beasts/fox.obj',
+                },
+                rabbit: {
+                    sound: "Snort",
+                    name: "rabbit",
+                    rotX: new Animated.Value(0),
+                    rotY: new Animated.Value(0),
+                    rotZ: new Animated.Value(0),
+                    posX: new Animated.Value(2.0),
+                    posY: new Animated.Value(-0.7),
+                    posZ: new Animated.Value(0),
+                    scale: 0.1,
+                    jumpUp: false,
+                    mtl: "./beasts/rabbit.mtl",
+                    obj: './beasts/rabbit.obj',
+                },
+                rat: {
+                    sound: "Squeak",
+                    name: "rat",
+                    rotX: new Animated.Value(0),
+                    rotY: new Animated.Value(0),
+                    rotZ: new Animated.Value(0),
+                    posX: new Animated.Value(2.0),
+                    posY: new Animated.Value(-1.0),
+                    posZ: new Animated.Value(0),
+                    scale: 0.03,
+                    jumpUp: true,
+                    mtl: './beasts/rat.mtl',
+                    obj: './beasts/rat.obj',
+                },
+                goat: {
+                    sound: "Bleat",
+                    name: "goat",
+                    rotX: new Animated.Value(0),
+                    rotY: new Animated.Value(0),
+                    rotZ: new Animated.Value(0),
+                    posX: new Animated.Value(2.0),
+                    posY: new Animated.Value(-1.0),
+                    posZ: new Animated.Value(0),
+                    scale: 0.03,
+                    jumpUp: false,
+                    mtl: './beasts/goat.mtl',
+                    obj: './beasts/goat.obj',
+                },
+                deer: {
+                    sound: "Squee",
+                    name: "deer",
+                    rotX: new Animated.Value(0),
+                    rotY: new Animated.Value(0),
+                    rotZ: new Animated.Value(0),
+                    posX: new Animated.Value(2.0),
+                    posY: new Animated.Value(-1.0),
+                    posZ: new Animated.Value(0),
+                    scale: 0.03,
+                    jumpUp: false,
+                    mtl: './beasts/deer.mtl',
+                    obj: './beasts/deer.obj',
+                },
+                cow: {
+                    sound: "Moo",
+                    name: "cow",
+                    rotX: new Animated.Value(0),
+                    rotY: new Animated.Value(0),
+                    rotZ: new Animated.Value(0),
+                    posX: new Animated.Value(2.0),
+                    posY: new Animated.Value(-1.0),
+                    posZ: new Animated.Value(0),
+                    scale: 0.035,
+                    jumpUp: false,
+                    mtl: './beasts/cow.mtl',
+                    obj: './beasts/cow.obj',
+                },
             }
         };
     }
@@ -107,24 +158,29 @@ class RabbitChase extends React.Component {
     /*START ANIMATIONS*/
 
     componentDidMount (){
-        let fox = this.state.creatures.fox;
-        let rabbit = this.state.creatures.rabbit;
-        this.run(fox, 4000);
-        this.run(rabbit, 4000);
-        this.bounce(rabbit, 0.7);
-        this.bounce(fox, 0.9);
+        let creatures = this.state.creatures;
+
+        Object.keys(creatures).forEach((c) => {
+            this.run(creatures[c], 7000, creatures[c].rotY._value);
+            this.bounce(creatures[c], 0.7);
+        });
+
+        //this.run(fox, 4000, fox.rotY._value);
+        //this.run(rabbit, 4000, rabbit.rotY._value);
+        //this.bounce(rabbit, 0.7);
+        //this.bounce(fox, 0.9);
     }
 
     /*ANIMATIONS*/
-    run = (creature, timing) => {
-        creature.rotY.setValue(0);
+    run = (creature, timing, rotation) => {
+        creature.rotY.setValue(rotation);
         Animated.timing(
             creature.rotY,
             {
-                toValue: -360,
+                toValue: rotation+360,
                 duration: timing, //in millis
             }
-        ).start(() => this.run(creature, timing));
+        ).start(() => this.run(creature, timing, rotation));
     };
 
     bounce = (creature, bounciness) => { 
@@ -166,30 +222,36 @@ class RabbitChase extends React.Component {
         ]).start(() => this.bounce(creature, bounciness));
     };
 
+    renderCreature(c, id, rotation){
+        let creature = this.state.creatures[c];
+        creature.rotY.setValue(rotation);
+        return (
+            <AnimatedModel key={id} style={{
+            transform: [
+                {rotateY: creature.rotY},
+                {rotateZ: creature.rotZ},
+                {translate: [creature.posX, creature.posY, creature.posZ]},
+                {rotateX: creature.rotX},
+                {scale: creature.scale}]}}
+                       source={{obj: asset(creature.obj), mtl:asset(creature.mtl)}}/>
+        );
+    }
+
     /*RENDER SCENE*/
     render() {
         let creatures = this.state.creatures;
+        let creatureModels = [];
+        let count = Object.keys(this.state.creatures).length;
+        let rotation = 0;
+        Object.keys(creatures).forEach((c, index) => {
+            creatureModels.push(this.renderCreature(c, index, rotation));
+            rotation = rotation + (360/count);  //position is based on the number of beasts.
+        });
         return (
             <View>
+                <AmbientLight intensity={100} style={{color: '#ff7f50'}}/>
                 <Pano source={asset('outside.jpg')}/>
-                <AnimatedModel style={{
-                    transform: [
-                        {rotateY: creatures.fox.rotY},
-                        {rotateZ: creatures.fox.rotZ},
-                        {translate: [creatures.fox.posX, creatures.fox.posY, creatures.fox.posZ]},
-                        {rotateX: creatures.fox.rotX},
-                        {scale: 0.005}]}}
-                       source={{obj: asset('./beasts/fox.obj'), mtl:asset('./beasts/fox.mtl')}}
-                />
-                <AnimatedModel style={{
-                    transform: [
-                        {rotateY: creatures.rabbit.rotY},
-                        {rotateZ: creatures.rabbit.rotZ},
-                        {translate: [creatures.rabbit.posX, creatures.rabbit.posY, creatures.rabbit.posZ]},
-                        {rotateX: creatures.rabbit.rotX},
-                        {scale: 0.1}]}}
-                       source={{obj: asset('./beasts/rabbit.obj'), mtl:asset('./beasts/rabbit.mtl')}}
-                />
+                {creatureModels}
                 <InfoBox creatures={creatures}/>
             </View>
         );
